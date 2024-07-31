@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="PT-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Locadora</title>
+<link rel="icon" th:href="@{/img/locadora.png}">
+<link
+	href="https://fonts.googleapis.com/css?family=Roboto:300,400,700&display=swap"
+	rel="stylesheet">
+
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+	integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+	crossorigin="anonymous">
+
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+	integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+	crossorigin="anonymous"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+	integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+	crossorigin="anonymous"></script>
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+	integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+	crossorigin="anonymous"></script>
+
+<script src="https://kit.fontawesome.com/14ec366e22.js"
+	crossorigin="anonymous"></script>
+	
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		<a class="navbar-brand" style="font-size: 30px;"></a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse"
+			data-target="#navbarNav" aria-controls="navbarNav"
+			aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav">
+				<li class="nav-item"><a class="nav-link" th:href="@{/home}">Alugar
+						<span class="sr-only">(current)</span>
+				</a>
+					</li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/estoque}">Estoque</a>
+					</li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/listarfilmes}">Relatório</a>
+					</li>
+
+				<ul class="navbar-nav" style="margin-left: 350%;">
+					<li class="nav-item"><a class="nav-link" th:href="@{/sair}">Sair</a>
+					</li>
+				</ul>
+			</ul>
+		</div>
+	</nav>
+
+
+	<div class="container mt-3">
+
+		<h1>Alugue um de nossos filmes:</h1>
+		<div class="row" id="filmesContainer">
+        
+    </div>
+	</div>
+
+
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+		integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+		integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+		integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+		crossorigin="anonymous"></script>
+	
+	<script>
+	$(document).ready(function() {
+	    $.ajax({
+	        type: 'GET',
+	        url: '/api/filmes/listfilmes',
+	        success: function(filmes) {
+	            $('#filmesContainer').empty();
+
+	            filmes.forEach(function(filme) {
+	                var imageUrl = filme.capaUrl || 'images/capas/default.jpg'; 
+
+	                var disponibilidade = filme.disponivel ? 'Disponível' : 'Indisponível';
+	                var inputDias = filme.disponivel ? '<input type="number" min="1" id="diasAlugar-' + filme.id + '" class="form-control form-control-sm mb-2" placeholder="Dias">' : '';
+	                var botaoAlugar = filme.disponivel ? '<button class="btn btn-primary btn-sm" onclick="alugarFilme(' + filme.id + ')">Alugar</button>' : '';
+
+	                var container = '<div class="col-md-3 mb-3">' +
+	                    '<div class="card">' +
+	                        '<img src="' + imageUrl + '" class="card-img-top" alt="' + filme.nome + '">' +
+	                        '<div class="card-body">' +
+	                            '<h5 class="card-title">' + filme.nome + '</h5>' +
+	                            '<p class="card-text">' + disponibilidade + '</p>' +
+	                            inputDias +
+	                            botaoAlugar +
+	                        '</div>' +
+	                    '</div>' +
+	                '</div>';
+
+	                $('#filmesContainer').append(container);
+	            });
+	        },
+	        error: function(error) {
+	            console.error('Erro ao obter filmes:', error);
+	        }
+	    });
+	});
+
+	function alugarFilme(filmeId) {
+	    var diasAlugar = $('#diasAlugar-' + filmeId).val();
+	    if (!diasAlugar) {
+	        alert('Por favor, insira o número de dias para alugar.');
+	        return;
+	    }
+
+	    $.ajax({
+	        type: 'POST',
+	        url: '/api/filmes/alugar/' + filmeId,
+	        data: JSON.stringify({ diasAlugados: diasAlugar }),
+	        contentType: 'application/json',
+	        success: function(response) {
+	            alert('Filme alugado com sucesso por ' + diasAlugar + ' dias!');
+	            location.reload(); 
+	        },
+	        error: function(error) {
+	            console.error('Erro ao alugar filme:', error);
+	        }
+	    });
+	}
+	</script>
+	<script>
+		$(document).ready(function() {
+			$('.submenu').hide();
+
+			$('.nav-item').hover(function() {
+				$(this).find('.submenu').stop(true, true).slideDown(200);
+			}, function() {
+				$(this).find('.submenu').stop(true, true).slideUp(200);
+			});
+		});
+	</script>
+
+</body>
+</html>
