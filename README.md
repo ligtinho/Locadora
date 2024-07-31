@@ -30,4 +30,5 @@ http://localhost:8080
 
 ## Banco de Dados
 
-O banco de dados está hospedado na Railway e já está configurado na aplicação. As configurações para conexão com o banco de dados estão definidas no arquivo `application.properties`:
+O banco de dados está hospedado na Railway. As configurações para conexão com o banco de dados já estão definidas no arquivo para fins de testes
+`application.properties`:
